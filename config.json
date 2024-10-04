@@ -1,0 +1,68 @@
+
+{
+    "customer": {
+        "name": "A1 Company, Inc",
+        "alias": ["a1-company-org-id"],
+        "stripe_id": null
+    },
+    "rate_card": {
+        "name": "Prices List"
+    },
+    "pricing_and_packaging": [
+        {
+            "product": {
+                "type": "USAGE",
+                "name": "AI Tokens",
+                "tags":["tasks"],
+                "pricing_group_key": ["tokens_type"],
+                "presentation_group_key": ["project"],
+                "quantity_conversion": {
+                    "name": "tokens in Million",
+                    "conversion_factor": 1000000,
+                    "operation": "divide"
+                },
+                "quantity_rounding": {
+                    "rounding_method": "round_down", 
+                    "decimal_places": 0
+                }
+            },
+            "billable_metric":{
+                "event_type": "tasks",
+                "name": "AI Tokens used by Task",
+                "metric_key": "count_tokens",
+                "metric_agg_rule": "sum",
+                "metric_values": {"min": 1000, "max":10000, "round": 0},
+                "properties": [
+                    {"name": "tokens_type", "enum": true, "in_values":["input", "output"]}, 
+                    {"name": "project", "enum": false, "in_values":["project A", "project B"]}
+                ]
+            },
+            "pricing":{
+                "pricing_in_cents": {"min": 2, "max":8, "round": 4},
+                "entitled": true
+            }
+        },{
+            "product": {
+                "type": "USAGE",
+                "name": "Tasks Executed",
+                "tags":["tasks"],
+                "pricing_group_key": [],
+                "presentation_group_key": ["project"]
+            },
+            "billable_metric": {
+                "event_type": "tasks",
+                "name": "Count Tasks Executed",
+                "metric_key": "count_tasks",
+                "metric_values": {"min": 1, "max":1, "round": 0},
+                "metric_agg_rule": "sum",
+                "properties": [
+                    {"name": "project", "enum": false, "in_values":["project A", "project B"]}
+                ]
+            },
+            "pricing":{
+                "pricing_in_cents": {"min": 10, "max":20, "round": 4},
+                "entitled": true
+            }
+        }
+    ]
+}
