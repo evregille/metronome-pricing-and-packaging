@@ -34,9 +34,9 @@ def main():
     f = open(OUTPUT_FILE_NAME)
     output = json.load(f)
     
-    # for p in CONFIG["pricing_and_packaging"]:
-    #     if p["product"]["type"] == "USAGE":
-    #         send_events(CONFIG["customer"]["alias"], p["billable_metric"])
+    for p in CONFIG["pricing_and_packaging"]:
+        if p["product"]["type"] == "USAGE":
+            send_events(CONFIG["customer"]["alias"], p["billable_metric"])
 
     customer_id = create_customer(CONFIG["customer"])
     output["customer_id"].append(customer_id)
@@ -54,7 +54,7 @@ def send_events(alias, billable_metric):
     while i < 100:
         e = {
             "transaction_id": str(uuid.uuid4()),
-            "customer_id": alias,
+            "customer_id": alias[0],
             "event_type": billable_metric["event_type"],
             "timestamp": (datetime.today().date() - timedelta(days=random.randint(0, 32))).strftime('%Y-%m-%dT00:00:00+00:00'),
             "properties":{}
@@ -77,14 +77,16 @@ def send_events(alias, billable_metric):
 def create_customer(customer):
     payload={
         "name": customer["name"],
-        "ingest_aliases": customer["alias"],
-        "billing_config": {
-            "billing_provider_type": "stripe",
-            "billing_provider_customer_id": customer["stripe_id"],
-            "stripe_collection_method": "charge_automatically"
-        } if "stripe_id" in customer else None
+        "ingest_aliases": customer["alias"]
     }
-    print(payload)
+    if "stripe_id" in customer and customer["stripe_id"] != None:
+        payload.update({
+            "billing_config": {
+                "billing_provider_type": "stripe",
+                "billing_provider_customer_id": customer["stripe_id"],
+                "stripe_collection_method": "charge_automatically"
+            }
+        })
     try:
         response = json.loads(
             client.customers.create(** payload).to_json()
